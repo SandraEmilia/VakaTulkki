@@ -1,98 +1,175 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text } from "react-native";
+import { categories } from "../../src/data/categories";
+import { languages } from "../../src/data/languages";
+import { phrases } from "../../src/data/phrases";
+import { handleSpeak } from "../../src/utils/handleSpeak";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+type Screen = "language" | "categories" | "phrases";
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+export default function App() {
+  const [screen, setScreen] = useState<Screen>("language");
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+  if (screen === "language") {
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Valitse kieli</Text>
+
+        {languages.map((language) => (
+          <Pressable
+            key={language.code}
+            style={styles.button}
+            onPress={() => {
+              setSelectedLanguage(language.code);
+              setScreen("categories");
+            }}
+          >
+            <Text style={styles.buttonText}>{language.label}</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+    );
+  }
+
+  if (screen === "categories") {
+    if (!selectedLanguage) {
+      return (
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.title}>Kieli puuttuu</Text>
+
+          <Pressable
+            style={styles.button}
+            onPress={() => setScreen("language")}
+          >
+            <Text style={styles.buttonText}>← Takaisin kielivalintaan</Text>
+          </Pressable>
+        </ScrollView>
+      );
+    }
+
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Valitse kategoria</Text>
+        <Text style={styles.subtitle}>Kieli: {selectedLanguage}</Text>
+
+        {categories.map((category) => (
+          <Pressable
+            key={category.id}
+            style={styles.button}
+            onPress={() => {
+              setSelectedCategory(category.id);
+              setScreen("phrases");
+            }}
+          >
+            <Text style={styles.buttonText}>{category.label}</Text>
+          </Pressable>
+        ))}
+
+        <Pressable
+          style={[styles.button, styles.backButton]}
+          onPress={() => setScreen("language")}
+        >
+          <Text style={styles.buttonText}>← Vaihda kieli</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
+  if (screen === "phrases") {
+    if (!selectedLanguage) {
+      return (
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.title}>Kieli puuttuu</Text>
+
+          <Pressable
+            style={styles.button}
+            onPress={() => setScreen("language")}
+          >
+            <Text style={styles.buttonText}>← Takaisin kielivalintaan</Text>
+          </Pressable>
+        </ScrollView>
+      );
+    }
+
+    if (!selectedCategory) {
+      return (
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.title}>Kategoria puuttuu</Text>
+
+          <Pressable
+            style={styles.button}
+            onPress={() => setScreen("categories")}
+          >
+            <Text style={styles.buttonText}>← Takaisin kategorioihin</Text>
+          </Pressable>
+        </ScrollView>
+      );
+    }
+
+    const filteredPhrases = phrases.filter(
+      (phrase) => phrase.category === selectedCategory,
+    );
+
+    return (
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Fraasit</Text>
+        <Text style={styles.subtitle}>
+          Kategoria: {selectedCategory} • Kieli: {selectedLanguage}
+        </Text>
+
+        {filteredPhrases.map((phrase) => (
+          <Pressable
+            key={phrase.id}
+            style={styles.button}
+            onPress={() => handleSpeak(phrase.fi)}
+          >
+            <Text style={styles.buttonText}>{phrase.fi}</Text>
+          </Pressable>
+        ))}
+
+        <Pressable
+          style={[styles.button, styles.backButton]}
+          onPress={() => setScreen("categories")}
+        >
+          <Text style={styles.buttonText}>← Takaisin kategorioihin</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
+  return null;
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    padding: 20,
+    paddingTop: 50,
+    paddingBottom: 40,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  title: {
+    fontSize: 24,
+    marginBottom: 12,
+    textAlign: "center",
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  subtitle: {
+    fontSize: 16,
+    marginBottom: 16,
+    textAlign: "center",
+    color: "gray",
+  },
+  button: {
+    padding: 16,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 10,
+    marginVertical: 8,
+  },
+  backButton: {
+    marginTop: 20,
+  },
+  buttonText: {
+    fontSize: 18,
+    textAlign: "center",
   },
 });
