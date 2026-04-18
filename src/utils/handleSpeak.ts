@@ -3,6 +3,9 @@ import * as FileSystem from "expo-file-system/legacy";
 
 const BACKEND_URL = "http://192.168.1.3:3001";
 
+// pidetään muistissa viimeisin ääni
+let currentSound: Audio.Sound | null = null;
+
 // tehdään turvallinen tiedostonimi
 function makeCacheKey(text: string, lang: string) {
   const safeText = text
@@ -13,9 +16,25 @@ function makeCacheKey(text: string, lang: string) {
   return `${lang}_${safeText}`;
 }
 
+async function stopCurrentSound() {
+  if (currentSound) {
+    try {
+      await currentSound.stopAsync();
+      await currentSound.unloadAsync();
+    } catch (error) {
+      console.error("Äänen pysäytys epäonnistui:", error);
+    } finally {
+      currentSound = null;
+    }
+  }
+}
+
 export async function handleSpeak(text: string, lang: string) {
   const cacheKey = makeCacheKey(text, lang);
   const fileUri = FileSystem.cacheDirectory + `${cacheKey}.mp3`;
+
+  // pysäytä vanha ääni aina ennen uuden aloittamista
+  await stopCurrentSound();
 
   // 1. Jos tiedosto löytyy cachesta, soita se heti
   const fileInfo = await FileSystem.getInfoAsync(fileUri);
@@ -24,12 +43,17 @@ export async function handleSpeak(text: string, lang: string) {
     console.log("Audio löytyi cachesta:", fileUri);
 
     const { sound } = await Audio.Sound.createAsync({ uri: fileUri });
+    currentSound = sound;
+
     await sound.playAsync();
 
     sound.setOnPlaybackStatusUpdate((status) => {
       if (!status.isLoaded) return;
       if (status.didJustFinish) {
         sound.unloadAsync();
+        if (currentSound === sound) {
+          currentSound = null;
+        }
       }
     });
 
@@ -64,12 +88,17 @@ export async function handleSpeak(text: string, lang: string) {
 
   // 4. Soita tallennettu tiedosto
   const { sound } = await Audio.Sound.createAsync({ uri: fileUri });
+  currentSound = sound;
+
   await sound.playAsync();
 
   sound.setOnPlaybackStatusUpdate((status) => {
     if (!status.isLoaded) return;
     if (status.didJustFinish) {
       sound.unloadAsync();
+      if (currentSound === sound) {
+        currentSound = null;
+      }
     }
   });
 }

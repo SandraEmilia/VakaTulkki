@@ -4,7 +4,10 @@
     "slug": "VakaTulkki",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "splash": {
+      "image": "./assets/images/VakaTulkki_SplashScreen.png",
+      "resizeMode": "cover"
+    },
     "scheme": "vakatulkki",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

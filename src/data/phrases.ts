@@ -68,16 +68,16 @@ export const phrases: Phrase[] = [
 
   // Wc-toiminnot
 
-  { id: "toilet_1", category: "toilet", fi: "Mene vessaan" },
-  { id: "toilet_2", category: "toilet", fi: "Tule vessaan" },
-  { id: "toilet_3", category: "toilet", fi: "Onko sinulla pissahätä?" },
-  { id: "toilet_4", category: "toilet", fi: "Onko sinulla kakkahätä?" },
-  { id: "toilet_5", category: "toilet", fi: "Istu potalle" },
-  { id: "toilet_6", category: "toilet", fi: "Vedä vessa" },
-  { id: "toilet_7", category: "toilet", fi: "Vaihdetaan vaippa" },
-  { id: "toilet_8", category: "toilet", fi: "Tarvitsetko apua?" },
-  { id: "toilet_9", category: "toilet", fi: "Pese kädet" },
-  { id: "toilet_10", category: "toilet", fi: "Kuivaa kädet" },
+  { id: "toilet_1", category: "wc", fi: "Mene vessaan" },
+  { id: "toilet_2", category: "wc", fi: "Tule vessaan" },
+  { id: "toilet_3", category: "wc", fi: "Onko sinulla pissahätä?" },
+  { id: "toilet_4", category: "wc", fi: "Onko sinulla kakkahätä?" },
+  { id: "toilet_5", category: "wc", fi: "Istu potalle" },
+  { id: "toilet_6", category: "wc", fi: "Vedä vessa" },
+  { id: "toilet_7", category: "wc", fi: "Vaihdetaan vaippa" },
+  { id: "toilet_8", category: "wc", fi: "Tarvitsetko apua?" },
+  { id: "toilet_9", category: "wc", fi: "Pese kädet" },
+  { id: "toilet_10", category: "wc", fi: "Kuivaa kädet" },
 
   // Ulkoilu
 
