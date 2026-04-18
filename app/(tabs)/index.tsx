@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { categories } from "../../src/data/categories";
 import { languages } from "../../src/data/languages";
 import { phrases } from "../../src/data/phrases";
@@ -11,40 +18,66 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>("language");
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
+  const getLanguageLabel = (code: string | null) => {
+    return languages.find((l) => l.code === code)?.label || code;
+  };
+
+  const getCategoryLabel = (id: string | null) => {
+    return categories.find((c) => c.id === id)?.label || id;
+  };
+
+  const renderHeader = (title: string, subtitle?: string) => (
+    <View style={styles.headerBox}>
+      <Text style={styles.appName}>VakaTulkki</Text>
+      <Text style={styles.title}>{title}</Text>
+      {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+    </View>
+  );
+
+  const onPhrasePress = async (text: string) => {
+    if (!selectedLanguage) return;
+
+    try {
+      setIsLoading(true);
+      await handleSpeak(text, selectedLanguage);
+    } catch (error) {
+      console.error("Puheen toisto epäonnistui:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 🔹 KIELIVALINTA
   if (screen === "language") {
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.headerBox}>
-          <Text style={styles.appName}>VakaTulkki</Text>
-          <Text style={styles.title}>Valitse kieli</Text>
-        </View>
+        {renderHeader("Valitse kieli")}
 
-        {languages.map((language) => (
+        {languages.map((lang) => (
           <Pressable
-            key={language.code}
+            key={lang.code}
             style={styles.button}
             onPress={() => {
-              setSelectedLanguage(language.code);
+              setSelectedLanguage(lang.code);
+              setSelectedCategory(null);
               setScreen("categories");
             }}
           >
-            <Text style={styles.buttonText}>{language.label}</Text>
+            <Text style={styles.buttonText}>{lang.label}</Text>
           </Pressable>
         ))}
       </ScrollView>
     );
   }
 
+  // 🔹 KATEGORIAT
   if (screen === "categories") {
     if (!selectedLanguage) {
       return (
         <ScrollView contentContainerStyle={styles.container}>
-          <View style={styles.headerBox}>
-            <Text style={styles.appName}>VakaTulkki</Text>
-            <Text style={styles.title}>Valitse kategoria</Text>
-            <Text style={styles.subtitle}>Kieli: {selectedLanguage}</Text>
-          </View>
+          {renderHeader("Kieli puuttuu")}
 
           <Pressable
             style={styles.button}
@@ -58,25 +91,32 @@ export default function App() {
 
     return (
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Valitse kategoria</Text>
-        <Text style={styles.subtitle}>Kieli: {selectedLanguage}</Text>
+        {renderHeader(
+          "Valitse kategoria",
+          `Kieli: ${getLanguageLabel(selectedLanguage)}`,
+        )}
 
-        {categories.map((category) => (
+        {categories.map((item) => (
           <Pressable
-            key={category.id}
-            style={styles.button}
+            key={item.id}
+            style={[styles.button, { backgroundColor: item.color }]}
             onPress={() => {
-              setSelectedCategory(category.id);
+              setSelectedCategory(item.id);
               setScreen("phrases");
             }}
           >
-            <Text style={styles.buttonText}>{category.label}</Text>
+            <Text style={styles.buttonText}>
+              {item.icon} {item.label}
+            </Text>
           </Pressable>
         ))}
 
         <Pressable
           style={[styles.button, styles.backButton]}
-          onPress={() => setScreen("language")}
+          onPress={() => {
+            setSelectedCategory(null);
+            setScreen("language");
+          }}
         >
           <Text style={styles.buttonText}>← Vaihda kieli</Text>
         </Pressable>
@@ -84,17 +124,12 @@ export default function App() {
     );
   }
 
+  // 🔹 FRAASIT
   if (screen === "phrases") {
     if (!selectedLanguage) {
       return (
         <ScrollView contentContainerStyle={styles.container}>
-          <View style={styles.headerBox}>
-            <Text style={styles.appName}>VakaTulkki</Text>
-            <Text style={styles.title}>Fraasit</Text>
-            <Text style={styles.subtitle}>
-              Kategoria: {selectedCategory} • Kieli: {selectedLanguage}
-            </Text>
-          </View>
+          {renderHeader("Kieli puuttuu")}
 
           <Pressable
             style={styles.button}
@@ -109,7 +144,7 @@ export default function App() {
     if (!selectedCategory) {
       return (
         <ScrollView contentContainerStyle={styles.container}>
-          <Text style={styles.title}>Kategoria puuttuu</Text>
+          {renderHeader("Kategoria puuttuu")}
 
           <Pressable
             style={styles.button}
@@ -122,40 +157,59 @@ export default function App() {
     }
 
     const filteredPhrases = phrases.filter(
-      (phrase) => phrase.category === selectedCategory,
+      (p) => p.category === selectedCategory,
     );
 
     return (
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Fraasit</Text>
-        <Text style={styles.subtitle}>
-          Kategoria: {selectedCategory} • Kieli: {selectedLanguage}
-        </Text>
+      <View style={styles.screenWrapper}>
+        <ScrollView contentContainerStyle={styles.container}>
+          {renderHeader(
+            "Fraasit",
+            `Kategoria: ${getCategoryLabel(
+              selectedCategory,
+            )} • Kieli: ${getLanguageLabel(selectedLanguage)}`,
+          )}
 
-        {filteredPhrases.map((phrase) => (
+          {filteredPhrases.map((p) => (
+            <Pressable
+              key={p.id}
+              style={[styles.button, isLoading && styles.buttonDisabled]}
+              disabled={isLoading}
+              onPress={() => onPhrasePress(p.fi)}
+            >
+              <Text style={styles.buttonText}>{p.fi}</Text>
+            </Pressable>
+          ))}
+
           <Pressable
-            key={phrase.id}
-            style={styles.button}
-            onPress={() => handleSpeak(phrase.fi, selectedLanguage)}
+            style={[styles.button, styles.backButton]}
+            onPress={() => setScreen("categories")}
+            disabled={isLoading}
           >
-            <Text style={styles.buttonText}>{phrase.fi}</Text>
+            <Text style={styles.buttonText}>← Takaisin kategorioihin</Text>
           </Pressable>
-        ))}
+        </ScrollView>
 
-        <Pressable
-          style={[styles.button, styles.backButton]}
-          onPress={() => setScreen("categories")}
-        >
-          <Text style={styles.buttonText}>← Takaisin kategorioihin</Text>
-        </Pressable>
-      </ScrollView>
+        {isLoading && (
+          <View style={styles.loadingOverlay}>
+            <View style={styles.loadingModal}>
+              <ActivityIndicator size="large" color="#3B6E8F" />
+              <Text style={styles.loadingText}>Haetaan ääntä...</Text>
+            </View>
+          </View>
+        )}
+      </View>
     );
   }
 
   return null;
 }
 
+// 🎨 STYLES
 const styles = StyleSheet.create({
+  screenWrapper: {
+    flex: 1,
+  },
   container: {
     flexGrow: 1,
     paddingHorizontal: 20,
@@ -191,21 +245,44 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    marginBottom: 18,
+    marginBottom: 4,
     textAlign: "center",
     color: "#5F7F95",
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingModal: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    paddingVertical: 20,
+    paddingHorizontal: 28,
+    alignItems: "center",
+    elevation: 6,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#3B6E8F",
   },
   button: {
     paddingVertical: 18,
     paddingHorizontal: 16,
-    backgroundColor: "#FFFFFF",
     borderRadius: 18,
     marginVertical: 8,
-    shadowColor: "#B7DDF7",
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
+    backgroundColor: "#FFFFFF",
     elevation: 3,
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
   backButton: {
     marginTop: 20,

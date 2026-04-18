@@ -3,6 +3,7 @@ import * as FileSystem from "expo-file-system/legacy";
 
 const BACKEND_URL = "http://192.168.1.3:3001";
 
+// tehdään turvallinen tiedostonimi
 function makeCacheKey(text: string, lang: string) {
   const safeText = text
     .toLowerCase()
@@ -13,51 +14,14 @@ function makeCacheKey(text: string, lang: string) {
 }
 
 export async function handleSpeak(text: string, lang: string) {
-  try {
-    const cachekey = makeCacheKey(text, lang);
-    const fileUri = FileSystem.cacheDirectory + `${cachekey}.mp3`;
+  const cacheKey = makeCacheKey(text, lang);
+  const fileUri = FileSystem.cacheDirectory + `${cacheKey}.mp3`;
 
-    const fileInfo = await FileSystem.getInfoAsync(fileUri);
+  // 1. Jos tiedosto löytyy cachesta, soita se heti
+  const fileInfo = await FileSystem.getInfoAsync(fileUri);
 
-    if (fileInfo.exists) {
-      console.log("Audio löytyi cachesta", fileUri);
-
-      const { sound } = await Audio.Sound.createAsync({ uri: fileUri });
-      await sound.playAsync();
-
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (!status.isLoaded) return;
-        if (status.didJustFinish) {
-          sound.unloadAsync();
-        }
-      });
-
-      return;
-    }
-
-    console.log("Audio haetaan backendistä");
-
-    const response = await fetch(`${BACKEND_URL}/speak`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ text, lang }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Backend response was not OK");
-    }
-
-    const data = await response.json();
-
-    if (!data.audioBase64) {
-      throw new Error("Audioa ei palautunut backendilta");
-    }
-
-    await FileSystem.writeAsStringAsync(fileUri, data.audioBase64, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
+  if (fileInfo.exists) {
+    console.log("Audio löytyi cachesta:", fileUri);
 
     const { sound } = await Audio.Sound.createAsync({ uri: fileUri });
     await sound.playAsync();
@@ -68,7 +32,44 @@ export async function handleSpeak(text: string, lang: string) {
         sound.unloadAsync();
       }
     });
-  } catch (error) {
-    console.error("handleSpeak error:", error);
+
+    return;
   }
+
+  // 2. Muuten hae backendilta
+  console.log("Audio haetaan backendilta");
+
+  const response = await fetch(`${BACKEND_URL}/speak`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ text, lang }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Backend response was not OK");
+  }
+
+  const data = await response.json();
+
+  if (!data.audioBase64) {
+    throw new Error("Audioa ei palautunut backendilta");
+  }
+
+  // 3. Tallenna cacheen
+  await FileSystem.writeAsStringAsync(fileUri, data.audioBase64, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+
+  // 4. Soita tallennettu tiedosto
+  const { sound } = await Audio.Sound.createAsync({ uri: fileUri });
+  await sound.playAsync();
+
+  sound.setOnPlaybackStatusUpdate((status) => {
+    if (!status.isLoaded) return;
+    if (status.didJustFinish) {
+      sound.unloadAsync();
+    }
+  });
 }
