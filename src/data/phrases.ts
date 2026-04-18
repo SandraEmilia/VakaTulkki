@@ -6,7 +6,6 @@ export type Phrase = {
 
 export const phrases: Phrase[] = [
   // Ruokailu
-  { id: "food_1", category: "food", fi: "Tule syömään" },
   { id: "food_2", category: "food", fi: "Mennään syömään" },
   { id: "food_3", category: "food", fi: "Onko sinulla nälkä?" },
   { id: "food_4", category: "food", fi: "Pese kädet" },
@@ -14,16 +13,16 @@ export const phrases: Phrase[] = [
   { id: "food_6", category: "food", fi: "Syödään" },
   { id: "food_7", category: "food", fi: "Haluatko maitoa?" },
   { id: "food_8", category: "food", fi: "Haluatko vettä?" },
-  { id: "food_9", category: "food", fi: "Juo maito" },
-  { id: "food_10", category: "food", fi: "Juo vesi" },
-  { id: "food_11", category: "food", fi: "Otatko leipää?" },
+  { id: "food_9", category: "food", fi: "Juo maitosi" },
+  { id: "food_10", category: "food", fi: "Juo vetesi" },
+  { id: "food_11", category: "food", fi: "Haluatko leipää?" },
   { id: "food_12", category: "food", fi: "Haluatko lisää?" },
   { id: "food_13", category: "food", fi: "Odota hetki" },
   { id: "food_14", category: "food", fi: "Ole hyvä" },
   { id: "food_15", category: "food", fi: "Oletko valmis?" },
   { id: "food_16", category: "food", fi: "Vie tarjotin pois" },
   { id: "food_17", category: "food", fi: "Hyvää ruokahalua!" },
-  { id: "food_18", category: "food", fi: "Pidätkö ruoasta?" },
+  { id: "food_18", category: "food", fi: "Pidätkö tästä ruoasta?" },
 
   // Pukeutuminen
   { id: "clothing_1", category: "clothing", fi: "Mennään ulos" },
@@ -38,7 +37,7 @@ export const phrases: Phrase[] = [
   { id: "clothing_10", category: "clothing", fi: "Housut" },
   { id: "clothing_11", category: "clothing", fi: "Paita" },
   { id: "clothing_12", category: "clothing", fi: "Sukat" },
-  { id: "clothing_13", category: "clothing", fi: "Alushousut" },
+  { id: "clothing_13", category: "clothing", fi: "Alusvaatteet" },
 
   // Leikkitilanteet
   { id: "play_1", category: "play", fi: "Leikitään" },
@@ -64,7 +63,7 @@ export const phrases: Phrase[] = [
   { id: "interaction_13", category: "interaction", fi: "Onko kaikki hyvin?" },
   { id: "interaction_14", category: "interaction", fi: "Ei ole hätää" },
   { id: "interaction_15", category: "interaction", fi: "Tuletko syliin?" },
-  { id: "interaction_16", category: "interaction", fi: "Lopeta" },
+  { id: "interaction_16", category: "interaction", fi: "Lopeta tuo" },
   { id: "interaction_17", category: "interaction", fi: "Hyvä!" },
 
   // Wc-toiminnot
