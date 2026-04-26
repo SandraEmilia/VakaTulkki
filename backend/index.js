@@ -36,7 +36,7 @@ async function synthesizeSpeech(text, lang) {
     ro: { name: "ro-RO-AlinaNeural", locale: "ro-RO" },
     ru: { name: "ru-RU-SvetlanaNeural", locale: "ru-RU" },
     so: { name: "so-SO-MuuseNeural", locale: "so-SO" },
-    sw: { name: "sw-KE-ZuriNeural", locale: "sw-KE" },
+    sw: { name: "sw-TZ-RehemaNeural", locale: "sw-TZ" },
 
     bn: { name: "bn-BD-NabanitaNeural", locale: "bn-BD" },
     yo: { name: "en-US-JennyNeural", locale: "en-US" },
