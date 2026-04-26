@@ -7,16 +7,18 @@
     "scheme": "vakatulkki",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "icon": "./assets/images/VakaTulkki_Icon.png",
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "package": "com.sandraemilia.vakatulkki",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/images/VakaTulkki_Icon.png",
         "backgroundColor": "#EAF6FF"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.sandraemilia.vakatulkki"
+      "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
@@ -27,10 +29,11 @@
       [
         "expo-splash-screen",
         {
-          "resizeMode": "cover",
           "backgroundColor": "#EAF6FF",
+          "image": "./assets/images/icon.png",
+          "imageWidth": 120,
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#EAF6FF"
           }
         }
       ]
