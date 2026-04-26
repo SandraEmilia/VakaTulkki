@@ -1,7 +1,7 @@
 import { Audio } from "expo-av";
 import * as FileSystem from "expo-file-system/legacy";
 
-const BACKEND_URL = "http://192.168.1.3:3001";
+const BACKEND_URL = "https://vakatulkki.onrender.com/";
 
 // pidetään muistissa viimeisin ääni
 let currentSound: Audio.Sound | null = null;
