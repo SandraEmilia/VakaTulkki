@@ -4,10 +4,6 @@
     "slug": "VakaTulkki",
     "version": "1.0.0",
     "orientation": "portrait",
-    "splash": {
-      "image": "./assets/images/VakaTulkki_SplashScreen.png",
-      "resizeMode": "cover"
-    },
     "scheme": "vakatulkki",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -16,8 +12,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#EAF6FF",
-        "foregroundImage": "./assets/images/VakaTulkki_Icon.png"
+        "backgroundColor": "#EAF6FF"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -32,8 +27,6 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/VakaTulkki_SplashScreen.png",
-          "imageWidth": 300,
           "resizeMode": "cover",
           "backgroundColor": "#EAF6FF",
           "dark": {

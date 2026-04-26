@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Pressable,
@@ -7,49 +7,71 @@ import {
     Text,
     View,
 } from "react-native";
+
 import { categories } from "../src/data/categories";
 import { languages } from "../src/data/languages";
 import { phrases } from "../src/data/phrases";
 import { handleSpeak } from "../src/utils/handleSpeak";
 
-type Screen = "language" | "categories" | "phrases";
+type Screen = "intro" | "language" | "categories" | "phrases";
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>("language");
+  const [screen, setScreen] = useState<Screen>("intro");
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const getLanguageLabel = (code: string | null) => {
-    return languages.find((l) => l.code === code)?.label || code;
-  };
+  // ⏱️ Intro timeout
+  useEffect(() => {
+    if (screen === "intro") {
+      const timer = setTimeout(() => {
+        setScreen("language");
+      }, 1800);
+      return () => clearTimeout(timer);
+    }
+  }, [screen]);
 
-  const getCategoryLabel = (id: string | null) => {
-    return categories.find((c) => c.id === id)?.label || id;
-  };
+  const getLanguageLabel = (code: string | null) =>
+    languages.find((l) => l.code === code)?.label || code;
+
+  const getCategoryLabel = (id: string | null) =>
+    categories.find((c) => c.id === id)?.label || id;
 
   const renderHeader = (title: string, subtitle?: string) => (
     <View style={styles.headerBox}>
       <Text style={styles.appName}>VakaTulkki</Text>
       <Text style={styles.title}>{title}</Text>
-      {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+      {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
     </View>
   );
 
   const onPhrasePress = async (text: string) => {
     if (!selectedLanguage) return;
-
     try {
       setIsLoading(true);
       await handleSpeak(text, selectedLanguage);
     } catch (error) {
-      console.error("Puheen toisto epäonnistui:", error);
+      console.error(error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 🔹 KIELIVALINTA
+  //INTRO
+  if (screen === "intro") {
+    return (
+      <View style={styles.introContainer}>
+        <View style={styles.introCloud}>
+          <Text style={styles.introTitle}>VakaTulkki</Text>
+        </View>
+        <Text style={styles.introSubtitle}>
+          Monikielisen vuorovaikutuksen tueksi
+        </Text>
+      </View>
+    );
+  }
+
+  //LANGUAGE
   if (screen === "language") {
     return (
       <ScrollView contentContainerStyle={styles.container}>
@@ -72,23 +94,8 @@ export default function App() {
     );
   }
 
-  // 🔹 KATEGORIAT
+  //CATEGORIES
   if (screen === "categories") {
-    if (!selectedLanguage) {
-      return (
-        <ScrollView contentContainerStyle={styles.container}>
-          {renderHeader("Kieli puuttuu")}
-
-          <Pressable
-            style={styles.button}
-            onPress={() => setScreen("language")}
-          >
-            <Text style={styles.buttonText}>← Takaisin kielivalintaan</Text>
-          </Pressable>
-        </ScrollView>
-      );
-    }
-
     return (
       <ScrollView contentContainerStyle={styles.container}>
         {renderHeader(
@@ -113,10 +120,7 @@ export default function App() {
 
         <Pressable
           style={[styles.button, styles.backButton]}
-          onPress={() => {
-            setSelectedCategory(null);
-            setScreen("language");
-          }}
+          onPress={() => setScreen("language")}
         >
           <Text style={styles.buttonText}>← Vaihda kieli</Text>
         </Pressable>
@@ -124,44 +128,12 @@ export default function App() {
     );
   }
 
-  // 🔹 FRAASIT
+  //PHRASES
   if (screen === "phrases") {
-    if (!selectedLanguage) {
-      return (
-        <ScrollView contentContainerStyle={styles.container}>
-          {renderHeader("Kieli puuttuu")}
-
-          <Pressable
-            style={styles.button}
-            onPress={() => setScreen("language")}
-          >
-            <Text style={styles.buttonText}>← Takaisin kielivalintaan</Text>
-          </Pressable>
-        </ScrollView>
-      );
-    }
-
-    if (!selectedCategory) {
-      return (
-        <ScrollView contentContainerStyle={styles.container}>
-          {renderHeader("Kategoria puuttuu")}
-
-          <Pressable
-            style={styles.button}
-            onPress={() => setScreen("categories")}
-          >
-            <Text style={styles.buttonText}>← Takaisin kategorioihin</Text>
-          </Pressable>
-        </ScrollView>
-      );
-    }
-
-    const filteredPhrases = phrases.filter(
-      (p) => p.category === selectedCategory,
-    );
+    const filtered = phrases.filter((p) => p.category === selectedCategory);
 
     return (
-      <View style={styles.screenWrapper}>
+      <View style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.container}>
           {renderHeader(
             "Fraasit",
@@ -170,7 +142,7 @@ export default function App() {
             )} • Kieli: ${getLanguageLabel(selectedLanguage)}`,
           )}
 
-          {filteredPhrases.map((p) => (
+          {filtered.map((p) => (
             <Pressable
               key={p.id}
               style={[styles.button, isLoading && styles.buttonDisabled]}
@@ -184,7 +156,6 @@ export default function App() {
           <Pressable
             style={[styles.button, styles.backButton]}
             onPress={() => setScreen("categories")}
-            disabled={isLoading}
           >
             <Text style={styles.buttonText}>← Takaisin kategorioihin</Text>
           </Pressable>
@@ -205,11 +176,8 @@ export default function App() {
   return null;
 }
 
-// 🎨 STYLES
+//STYLES
 const styles = StyleSheet.create({
-  screenWrapper: {
-    flex: 1,
-  },
   container: {
     flexGrow: 1,
     paddingHorizontal: 20,
@@ -217,81 +185,115 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     backgroundColor: "#EAF6FF",
   },
+
   headerBox: {
     backgroundColor: "#FFFFFF",
     borderRadius: 24,
     paddingVertical: 18,
     paddingHorizontal: 16,
     marginBottom: 24,
-    shadowColor: "#B7DDF7",
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
     elevation: 4,
   },
+
   appName: {
     fontSize: 34,
     fontWeight: "800",
     textAlign: "center",
     color: "#3B6E8F",
-    marginBottom: 6,
   },
+
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "700",
-    marginBottom: 12,
+    textAlign: "center",
+    marginTop: 6,
+    color: "#2F5D7A",
+  },
+
+  subtitle: {
+    fontSize: 15,
+    textAlign: "center",
+    marginTop: 4,
+    color: "#5F7F95",
+  },
+
+  button: {
+    paddingVertical: 18,
+    borderRadius: 18,
+    marginVertical: 8,
+    backgroundColor: "#FFFFFF",
+    elevation: 3,
+  },
+
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+
+  backButton: {
+    marginTop: 20,
+    backgroundColor: "#D9EEF9",
+  },
+
+  buttonText: {
+    fontSize: 18,
+    fontWeight: "600",
     textAlign: "center",
     color: "#2F5D7A",
   },
-  subtitle: {
-    fontSize: 16,
-    marginBottom: 4,
-    textAlign: "center",
-    color: "#5F7F95",
-  },
+
+  //LOADING
   loadingOverlay: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.15)",
+    backgroundColor: "rgba(0,0,0,0.2)",
     justifyContent: "center",
     alignItems: "center",
   },
+
   loadingModal: {
     backgroundColor: "#FFFFFF",
+    padding: 20,
     borderRadius: 20,
-    paddingVertical: 20,
-    paddingHorizontal: 28,
     alignItems: "center",
-    elevation: 6,
   },
+
   loadingText: {
     marginTop: 10,
     fontSize: 16,
+    color: "#3B6E8F",
     fontWeight: "600",
+  },
+
+  //INTRO
+  introContainer: {
+    flex: 1,
+    backgroundColor: "#EAF6FF",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+
+  introCloud: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 40,
+    paddingVertical: 28,
+    paddingHorizontal: 36,
+    elevation: 6,
+  },
+
+  introTitle: {
+    fontSize: 42,
+    fontWeight: "900",
     color: "#3B6E8F",
   },
-  button: {
-    paddingVertical: 18,
-    paddingHorizontal: 16,
-    borderRadius: 18,
-    marginVertical: 8,
-    backgroundColor: "#FFFFFF",
-    elevation: 3,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  backButton: {
-    marginTop: 20,
-    backgroundColor: "#D9EEF9",
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: "600",
+
+  introSubtitle: {
+    marginTop: 18,
+    fontSize: 16,
+    color: "#5F7F95",
     textAlign: "center",
-    color: "#2F5D7A",
   },
 });
