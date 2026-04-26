@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
+    Image,
     Pressable,
     ScrollView,
     StyleSheet,
@@ -21,12 +22,12 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // ⏱️ Intro timeout
+  //Intro timeout
   useEffect(() => {
     if (screen === "intro") {
       const timer = setTimeout(() => {
         setScreen("language");
-      }, 1800);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [screen]);
@@ -61,12 +62,11 @@ export default function App() {
   if (screen === "intro") {
     return (
       <View style={styles.introContainer}>
-        <View style={styles.introCloud}>
-          <Text style={styles.introTitle}>VakaTulkki</Text>
-        </View>
-        <Text style={styles.introSubtitle}>
-          Monikielisen vuorovaikutuksen tueksi
-        </Text>
+        <Image
+          source={require("../assets/images/VakaTulkki_SplashScreen.png")}
+          style={styles.introImage}
+          resizeMode="cover"
+        />
       </View>
     );
   }
@@ -271,29 +271,10 @@ const styles = StyleSheet.create({
   introContainer: {
     flex: 1,
     backgroundColor: "#EAF6FF",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
   },
 
-  introCloud: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 40,
-    paddingVertical: 28,
-    paddingHorizontal: 36,
-    elevation: 6,
-  },
-
-  introTitle: {
-    fontSize: 42,
-    fontWeight: "900",
-    color: "#3B6E8F",
-  },
-
-  introSubtitle: {
-    marginTop: 18,
-    fontSize: 16,
-    color: "#5F7F95",
-    textAlign: "center",
+  introImage: {
+    width: "100%",
+    height: "100%",
   },
 });

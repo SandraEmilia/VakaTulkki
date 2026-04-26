@@ -31,9 +31,11 @@
         {
           "backgroundColor": "#EAF6FF",
           "image": "./assets/images/icon.png",
-          "imageWidth": 120,
+          "imageWidth": 1,
           "dark": {
-            "backgroundColor": "#EAF6FF"
+            "backgroundColor": "#EAF6FF",
+            "image": "./assets/images/icon.png",
+            "imageWidth": 1
           }
         }
       ]
