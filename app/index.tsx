@@ -27,7 +27,7 @@ export default function App() {
     if (screen === "intro") {
       const timer = setTimeout(() => {
         setScreen("language");
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [screen]);
