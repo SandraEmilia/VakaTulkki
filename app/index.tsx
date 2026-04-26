@@ -1,16 +1,16 @@
 import { useState } from "react";
 import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
+    ActivityIndicator,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
 } from "react-native";
-import { categories } from "../../src/data/categories";
-import { languages } from "../../src/data/languages";
-import { phrases } from "../../src/data/phrases";
-import { handleSpeak } from "../../src/utils/handleSpeak";
+import { categories } from "../src/data/categories";
+import { languages } from "../src/data/languages";
+import { phrases } from "../src/data/phrases";
+import { handleSpeak } from "../src/utils/handleSpeak";
 
 type Screen = "language" | "categories" | "phrases";
 
