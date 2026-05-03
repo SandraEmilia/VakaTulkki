@@ -25,9 +25,12 @@ export default function App() {
   //Intro timeout
   useEffect(() => {
     if (screen === "intro") {
+      fetch("https://vakatulkki.onrender.com").catch(() => {
+        //Backendin herättely
+      });
       const timer = setTimeout(() => {
         setScreen("language");
-      }, 4000);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [screen]);
